@@ -45,7 +45,7 @@ jobs:
         with:
           name: diabetes-ml-artifacts
           path: |
-            diabetes_model.pkl
+            diabetes_model_missing.pkl
             metrics.json
             diabetes_data.csv
           if-no-files-found: error
