@@ -1,19 +1,19 @@
 import json
 import sys
 
-MINIMUM_ACCURACY = 0.85
+MINIMUM_R2 = 0.40
 
 print("Reading model evaluation metrics...")
 
 with open("metrics.json", "r") as file:
     metrics = json.load(file)
 
-accuracy = metrics["accuracy"]
+r2 = metrics["r2"]
 
-print("Model Accuracy   :", round(accuracy, 4))
-print("Required Accuracy:", MINIMUM_ACCURACY)
+print("Model R2 Score   :", round(r2, 4))
+print("Required R2      :", MINIMUM_R2)
 
-if accuracy < MINIMUM_ACCURACY:
+if r2 < MINIMUM_R2:
     print("QUALITY GATE FAILED")
     print("Model performance is below the required threshold.")
     sys.exit(1)
