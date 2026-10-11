@@ -39,3 +39,14 @@ jobs:
 
       - name: Run automated ML tests
         run: python -m unittest discover -v
+
+      - name: Upload validated ML artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: diabetes-ml-artifacts
+          path: |
+            diabetes_model.pkl
+            metrics.json
+            diabetes_data.csv
+          if-no-files-found: error
+          retention-days: 7
