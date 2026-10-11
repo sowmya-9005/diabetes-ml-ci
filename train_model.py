@@ -1,6 +1,7 @@
 import json
 import joblib
 import numpy as np
+import pandas as pd
 from sklearn.datasets import load_diabetes
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error, r2_score
@@ -17,6 +18,12 @@ def train_model():
 
     print(f"Dataset shape: {X.shape}")
     print(f"Features: {data.feature_names}")
+
+    # Save dataset as CSV
+    df = pd.DataFrame(data.data, columns=data.feature_names)
+    df["target"] = data.target
+    df.to_csv("diabetes_data.csv", index=False)
+    print("Dataset saved as diabetes_data.csv")
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.20, random_state=42
