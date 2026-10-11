@@ -1,79 +1,54 @@
 import json
 import joblib
 import numpy as np
-import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.datasets import load_diabetes
+from sklearn.linear_model import Ridge
+from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
-
-
-def create_dataset():
-    rng = np.random.default_rng(42)
-    number_of_students = 300
-
-    data = pd.DataFrame({
-        "attendance": rng.integers(50, 101, number_of_students),
-        "internal_marks": rng.integers(20, 101, number_of_students),
-        "assignment_marks": rng.integers(30, 101, number_of_students),
-        "previous_score": rng.integers(30, 101, number_of_students)
-    })
-
-    data["weighted_score"] = (
-        0.25 * data["attendance"]
-        + 0.35 * data["internal_marks"]
-        + 0.20 * data["assignment_marks"]
-        + 0.20 * data["previous_score"]
-    )
-
-    data["result"] = (data["weighted_score"] >= 60).astype(int)
-    return data
+import math
 
 
 def train_model():
-    print("Creating dataset...")
-    data = create_dataset()
-    data.to_csv("student_results.csv", index=False)
+    print("Loading Diabetes dataset...")
+    data = load_diabetes()
+    X, y = data.data, data.target
 
-    print("Dataset created successfully.")
-    print("Number of records:", len(data))
-
-    features = ["attendance", "internal_marks", "assignment_marks", "previous_score"]
-
-    X = data[features]
-    y = data["result"]
+    print(f"Dataset shape: {X.shape}")
+    print(f"Features: {data.feature_names}")
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.20, random_state=42, stratify=y
+        X, y, test_size=0.20, random_state=42
     )
 
-    print("Training records:", len(X_train))
-    print("Testing records :", len(X_test))
+    print(f"Training records: {len(X_train)}")
+    print(f"Testing records : {len(X_test)}")
 
     model = Pipeline([
         ("scaler", StandardScaler()),
-        ("classifier", LogisticRegression(max_iter=1000, random_state=42))
+        ("regressor", Ridge(alpha=1.0))
     ])
 
     print("Training model...")
     model.fit(X_train, y_train)
 
     predictions = model.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-    matrix = confusion_matrix(y_test, predictions)
+    mse = mean_squared_error(y_test, predictions)
+    r2 = r2_score(y_test, predictions)
 
     print("\nModel Evaluation")
     print("----------------")
-    print("Accuracy:", round(accuracy, 4))
-    print("\nConfusion Matrix:")
-    print(matrix)
+    print(f"MSE  : {mse:.2f}")
+    print(f"RMSE : {math.sqrt(mse):.2f}")
+    print(f"R2   : {r2:.4f}")
 
-    joblib.dump(model, "student_result_model.pkl")
-    print("\nModel saved as student_result_model.pkl")
+    joblib.dump(model, "diabetes_model.pkl")
+    print("\nModel saved as diabetes_model.pkl")
 
     metrics = {
-        "accuracy": float(accuracy),
+        "r2": float(r2),
+        "mse": float(mse),
         "training_records": len(X_train),
         "testing_records": len(X_test)
     }
@@ -82,7 +57,7 @@ def train_model():
         json.dump(metrics, file, indent=4)
 
     print("Metrics saved as metrics.json")
-    return accuracy
+    return r2
 
 
 if __name__ == "__main__":
